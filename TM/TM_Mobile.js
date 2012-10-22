@@ -1,8 +1,10 @@
-﻿$(function()
+﻿var TM_WebServices = SecurityInnovation.TeamMentor.WebClient.WebServices.TM_WebServices;
+
+$(function()
 	{	
 		populateHomePageList();	
 
-	SecurityInnovation.TeamMentor.WebClient.WebServices.TM_WebServices.Login_PwdInClearText("admin","!!tmadmin",alert);
+		//SecurityInnovation.TeamMentor.WebClient.WebServices.TM_WebServices.Login_PwdInClearText("admin","!!tmadmin",alert);
 	});
 
 
@@ -17,7 +19,16 @@ var populateHomePageList = function()
 				$("#homepage_list").append(liHtml);
 			};
 
-		addLibraryLink("OWASP");
-		addLibraryLink(".Net 3.5");
-		$("#homepage_list").listview('refresh');
+		TM_WebServices.GetLibraries(function(libraries)
+			{
+				$(libraries).each(function(index,value)
+					{
+						addLibraryLink(value.Caption);
+					});
+				$("#homepage_list").listview('refresh');
+			});
+				
+		//addLibraryLink("OWASP");
+		//addLibraryLink(".Net 3.5");
+		
 	};
