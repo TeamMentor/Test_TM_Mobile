@@ -5,34 +5,89 @@ var a = null;
 var id = null;
 var lib = null;
 
-var addPage = function(pageId, pageName)
+var addPage = function(pageId, pageName, pageType, backPage)
 	{
 			var page = $("<div data-role='page' id='" + pageId + "'>test</div>");	
 			page.html($("#page_template").html());
-			page.find(".header h3").html("Library: " + pageName);
+			page.find(".header h3").html( pageType + ": " + pageName);
+			page.find(".header a").attr('href', "#" + backPage).css('color','black');
 			page.appendTo("body");
 			return page;
 	};
 
-var addViews = function(targetList, views)
+var addListItem = function(targetList, text, image, pageType, backPage, onClick)
 	{
-		$(views).each(function(index,value)
+				var id = text.replace(/ /g,'_').replace(/:/g,'_').replace(/\(/g,'_').replace(/\)/g,'_').replace(/\./g,'_');
+				var li = $( '<li><a href="#'+ id +'"		data-transition="slide"><img src="' +  image + '" alt="'+text +
+							     '" class="ui-li-icon">'+ text +'</a></li>');
+				targetList.append(li);
+				var pageDiv = addPage(id, text,pageType , backPage);
+//				li.click(function() { onClick(pageDiv);});		 
+
+				li.click(function() 
+					{
+//						var pageDiv = addPage(id, text,pageType , backPage);
+
+						onClick(pageDiv);
+					});		 
+	};
+var addArticles = function(targetList, articles, backPage)
+	{
+		
+		$(articles).each(function(index, article)
 			{
-				var liHtml = '<li><a href="#'+ value.caption +'"		data-transition="slide"><img src="/TM/ViewIcon.png" alt="'+value.caption +
-							 '" class="ui-li-icon">'+ value.caption +'</a></li>';
-				targetList.append(liHtml);
+				addListItem(targetList, article.Metadata.Title,"/images/blog.png", "Article", backPage,  
+					function(pageDiv) 
+						{
+
+							var html = article.Content.Data_Json;
+
+							pageDiv.find(".wrapper").html('<div data-role="content" class="content"> ' + html  +'</div>');
+
+						});
+				
+
+			});
+		targetList.listview('refresh');
+//		alert("Loading articles : " + articles.size());
+	};
+
+var loadViewData = function(targetPage, viewGuid)
+	{
+		var backPage = targetPage.attr('id');
+		if (targetPage.find("ul li").size()  <2)
+		{
+//			con("need to load data for viewId:" + viewGuid);
+			TM_WebServices.GetGuidanceItemsInView(viewGuid, function(articles) {  addArticles(targetPage.find('ul'), articles, backPage); });
+
+		}			
+//		tv = targetDiv;
+	};
+var addViews = function(targetList, views, backPage)
+	{
+		$(views).each(function(index,view)
+			{
+				
+				addListItem(targetList, view.caption, "/TM/ViewIcon.png",  "View", backPage, function(pageDiv) 
+					{ 
+						loadViewData(pageDiv , view.viewId);
+					});
+				
+
 			});
 	};
 
-var addFolders = function(targetList, folders)
+var addFolders = function(targetList, folders, backPage)
 	{
 		$(folders).each(function(index,value)
 			{
-				var folderLink = value.name.replace(/ /g,'_');
-				var liHtml = '<li><a href="#'+ folderLink  +'"		data-transition="slide"><img src="/TM/FolderIcon.png" alt="'+value.name  +
-							 '" class="ui-li-icon">'+ value.name +'</a></li>';
+				var folderName = value.name;
+				var folderId = folderName.replace(/ /g,'_');
+				var liHtml = '<li><a href="#'+ folderId  +'"		data-transition="slide"><img src="/TM/FolderIcon.png" alt="' + folderName +
+							 '" class="ui-li-icon">'+ folderName +'</a></li>';
 				targetList.append(liHtml);
-				id = value;	
+				var folderDiv = addPage(folderId, folderName, "Folder", backPage);
+				addViews(folderDiv.find("ul"), value.views, folderId);
 			});
 	};
 	
@@ -49,9 +104,9 @@ var createLibraryView = function(library)
 			};
 		
 			addLibraryLink(libraryName);
-			var libraryDiv = addPage(libraryLink, libraryName);
-			addFolders(libraryDiv.find("ul"), library.subFolders);			
-			addViews(libraryDiv.find("ul"), library.views);
+			var libraryDiv = addPage(libraryLink, libraryName, "Library", "homepage");
+			addFolders(libraryDiv.find("ul"), library.subFolders, libraryLink);			
+			addViews(libraryDiv.find("ul"), library.views, libraryLink);
 			
 			lib = library;
 	};
@@ -75,7 +130,7 @@ var populateHomePageList = function()
 				$("#homepage_list:visible").listview('refresh');
 				
 				
-				$.mobile.changePage('#OWASP');
+//				$.mobile.changePage('#OWASP');
 						   
 			});
 				
@@ -85,10 +140,10 @@ var populateHomePageList = function()
 
 	};
 	
-	
-	$(function()
-	{	
-		populateHomePageList();	
 
+
+	$(function()
+	{			
+		populateHomePageList();	
 		//SecurityInnovation.TeamMentor.WebClient.WebServices.TM_WebServices.Login_PwdInClearText("admin","!!tmadmin",alert);
 	});
