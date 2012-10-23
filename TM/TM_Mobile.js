@@ -1,4 +1,4 @@
-/*global SecurityInnovation $ document prettyPrint*/
+/*global SecurityInnovation $ document prettyPrint creole*/
 var TM_WebServices = SecurityInnovation.TeamMentor.WebClient.WebServices.TM_WebServices;
 
 var a = null;
@@ -22,12 +22,9 @@ var addListItem = function(targetList, text, image, pageType, backPage, onClick)
 							     '" class="ui-li-icon">'+ text +'</a></li>');
 				targetList.append(li);
 				var pageDiv = addPage(id, text,pageType , backPage);
-//				li.click(function() { onClick(pageDiv);});		 
 
 				li.click(function() 
 					{
-//						var pageDiv = addPage(id, text,pageType , backPage);
-
 						onClick(pageDiv);
 					});		 
 	};
@@ -39,12 +36,19 @@ var addArticles = function(targetList, articles, backPage)
 				addListItem(targetList, article.Metadata.Title,"/images/blog.png", "Article", backPage,  
 					function(pageDiv) 
 						{
-
 							var html = article.Content.Data_Json;
+							if (article.Content.DataType.toLowerCase() === "wikitext")
+							{
+				                var wikiText = html;
+				                var targetDiv = document.createElement('div');        
+				                new creole().parse(targetDiv,wikiText ) ;
+				                html = targetDiv.innerHTML ;                             
+							}
+							
 							pageDiv.find(".wrapper").html('<div data-role="content" class="content"> ' + html  +'</div>');
 							pageDiv.find(".wrapper pre").addClass("prettyprint");
-						    prettyPrint();
-
+							prettyPrint();
+							
 						});
 				
 
