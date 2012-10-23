@@ -1,4 +1,4 @@
-﻿// Name:        MicrosoftAjax.debug.js
+// Name:        MicrosoftAjax.debug.js
 // Assembly:    System.Web.Extensions
 // Version:     4.0.0.0
 // FileVersion: 4.0.30319.272
@@ -19,7 +19,7 @@ Function.createCallback = function Function$createCallback(method, context) {
         {name: "method", type: Function},
         {name: "context", mayBeNull: true}
     ]);
-    if (e) throw e;
+    if (e) { throw e;}
     return function() {
         var l = arguments.length;
         if (l > 0) {
@@ -31,8 +31,8 @@ Function.createCallback = function Function$createCallback(method, context) {
             return method.apply(this, args);
         }
         return method.call(this, context);
-    }
-}
+    };
+};
 Function.createDelegate = function Function$createDelegate(instance, method) {
     /// <summary locid="M:J#Function.createDelegate" />
     /// <param name="instance" mayBeNull="true"></param>
