@@ -1,4 +1,4 @@
-/*global SecurityInnovation $ document*/
+/*global SecurityInnovation $ document prettyPrint*/
 var TM_WebServices = SecurityInnovation.TeamMentor.WebClient.WebServices.TM_WebServices;
 
 var a = null;
@@ -41,8 +41,9 @@ var addArticles = function(targetList, articles, backPage)
 						{
 
 							var html = article.Content.Data_Json;
-
 							pageDiv.find(".wrapper").html('<div data-role="content" class="content"> ' + html  +'</div>');
+							pageDiv.find(".wrapper pre").addClass("prettyprint");
+						    prettyPrint();
 
 						});
 				
